@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getUsers, deleteUser, getAnalytics, getSettings, updateSetting, updateUserRole } = require('../controllers/adminController');
+const { getUsers, deleteUser, getAnalytics, getSettings, updateSetting, updateUserRole, getHealth } = require('../controllers/adminController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
+router.route('/health').get(protect, adminOnly, getHealth);
 router.route('/users').get(protect, adminOnly, getUsers);
 router.route('/users/:id').delete(protect, adminOnly, deleteUser);
 router.route('/users/:id/role').patch(protect, adminOnly, updateUserRole);

@@ -52,7 +52,25 @@ const getRestaurantById = async (req, res) => {
   try {
     const profile = await RestaurantProfile.findById(req.params.id);
     if (profile) {
-      res.json(profile);
+      const Reservation = require('../models/Reservation');
+      const activeReservations = await Reservation.find({ 
+          restaurant_id: profile.user_id,
+          status: { $in: ['Pending', 'Accepted'] } 
+      });
+
+      // Map dynamic status to tables
+      const updatedTables = profile.tables.map(t => {
+          const matchingRes = activeReservations.find(r => r.tableNumber === t.tableNumber);
+          return {
+              ...t.toObject(),
+              status: matchingRes ? matchingRes.status : (t.status || 'Available')
+          };
+      });
+
+      const profileObj = profile.toObject();
+      profileObj.tables = updatedTables;
+      
+      res.json(profileObj);
     } else {
       res.status(404).json({ message: 'Restaurant not found' });
     }
